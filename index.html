@@ -49,12 +49,11 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:
   <nav class="nav">
     <button onclick="show('accueil')">Accueil</button>
     <button onclick="show('apropos')">À propos</button>
-    <button onclick="show('prehistoire')">Pré-histoire</button>
     <button onclick="show('services')">Services</button>
     <button onclick="show('galerie')">Galerie</button>
     <button onclick="show('commande')">Commander</button>
     <button onclick="show('contact')">Contact</button>
-    <button onclick="openLogin()">Admin</button>
+    <button onclick="toggleAdmin()">Admin</button>
   </nav>
 </header>
 
@@ -65,7 +64,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:
     <div class="hero">
       <div class="left">
         <h2 id="heroTitle">Histoire & héritage de la sculpture malgache</h2>
-        <p id="heroText">Le sculpteur malgache puise son inspiration dans les traditions ancestrales et les légendes locales. Depuis des siècles, l’art de la sculpture transmet la culture, les croyances et l’âme du peuple.</p>
+        <p id="heroText">Le sculpteur malgache puise son inspiration dans les traditions ancestrales et les légendes locales.</p>
       </div>
       <div class="thumb">
         <img id="heroImg" src="https://i.imgur.com/Fv1C9qR.jpg" alt="Accueil" onclick="openLightboxFromHero()">
@@ -74,7 +73,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:
     <div class="admin-panel" id="adminAccueil">
       <h3>Modifier Accueil</h3>
       <textarea id="editHeroText" rows="4" class="input"></textarea>
-      <input type="file" id="editHeroImage" accept="image/*" class="input">
+      <input type="text" id="editHeroImage" placeholder="URL de l'image" class="input">
       <button class="btn" onclick="saveHero()">Enregistrer</button>
     </div>
   </section>
@@ -104,7 +103,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:
     <h2>Galerie</h2>
     <div id="galleryGrid" class="gallery"></div>
     <div class="admin-panel" id="adminGallery">
-      <input type="file" id="galleryFile" accept="image/*" class="input">
+      <input type="text" id="galleryFile" placeholder="URL de l'image" class="input">
       <input id="galleryTitle" class="input" placeholder="Titre">
       <input id="galleryPrice" class="input" placeholder="Prix">
       <textarea id="galleryDesc" rows="2" class="input" placeholder="Description"></textarea>
@@ -170,9 +169,9 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
-const KEY='sculpture_site_final_v1';
+const KEY='sculpture_site_final_v2';
+let sculpteurWA='+261340000000';
 
 function defaultState(){ return {
   hero:{text:'Le sculpteur malgache puise son inspiration dans les traditions ancestrales.',image:'https://i.imgur.com/Fv1C9qR.jpg'},
@@ -187,7 +186,7 @@ function defaultState(){ return {
 
 let state;
 function loadState(){ try{ state=JSON.parse(localStorage.getItem(KEY))||defaultState(); }catch(e){ state=defaultState(); } saveState();}
-function saveState(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+function saveState(){ localStorage.setItem(KEY,JSON.stringify(state)); renderAll(); }
 
 function renderAll(){
   document.getElementById('year').textContent=new Date().getFullYear();
@@ -210,49 +209,39 @@ function closeLightbox(){ document.getElementById('lightbox').style.display='non
 /* NAVIGATION */
 function show(id){ ['accueil','apropos','services','galerie','commande','contact'].forEach(s=>{document.getElementById(s).style.display=(s===id?'block':'none');});}
 
-/* ADMIN */
-function saveHero(){ const t=document.getElementById('editHeroText').value; state.hero.text=t; const f=document.getElementById('editHeroImage').files[0]; if(f){ const r=new FileReader(); r.onload=function(){ state.hero.image=r.result; saveState(); renderAll(); } r.readAsDataURL(f);} else { saveState(); renderAll(); } }
-function saveAbout(){ state.about=document.getElementById('editAbout').value; saveState(); renderAll(); }
-function saveServices(){ state.services=document.getElementById('editServices').value.split('\n').filter(Boolean); saveState(); renderServices(); populateOeuvres(); }
-function addGalleryItem(){ const f=document.getElementById('galleryFile').files[0]; if(!f) return alert('Choisir une image'); const t=document.getElementById('galleryTitle').value||'Titre'; const d=document.getElementById('galleryDesc').value||''; const p=document.getElementById('galleryPrice').value||''; const r=new FileReader(); r.onload=function(){ state.gallery.push({image:r.result,title:t,desc:d,price:p}); saveState(); renderGallery(); populateOeuvres(); }; r.readAsDataURL(f);}
-function clearGallery(){ if(confirm('Vider la galerie ?')){ state.gallery=[]; saveState(); renderGallery(); populateOeuvres(); } }
-function resetOrderForm(){ document.getElementById('orderForm').reset(); }
-
-/* -----------------------------
-   COMMANDE via WhatsApp
------------------------------ */
-let sculpteurWA = '+261340000000';
-function setSculpteurWA(){
-    const newWA = prompt("Entrer le nouveau numéro WhatsApp du sculpteur (ex: +261340000000) :", sculpteurWA);
-    if(newWA){ sculpteurWA = newWA; alert('Numéro WhatsApp mis à jour !'); }
+/* ADMIN PANEL */
+function toggleAdmin(){
+  ['adminAccueil','adminApropos','adminServices','adminGallery'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=(el.style.display==='block'?'none':'block');
+  });
 }
+function saveHero(){ state.hero.text=document.getElementById('editHeroText').value; const imgURL=document.getElementById('editHeroImage').value; if(imgURL) state.hero.image=imgURL; saveState(); }
+function saveAbout(){ state.about=document.getElementById('editAbout').value; saveState(); }
+function saveServices(){ state.services=document.getElementById('editServices').value.split('\n').filter(Boolean); saveState(); }
+function addGalleryItem(){ const url=document.getElementById('galleryFile').value; if(!url) return alert('Entrer l\'URL de l\'image'); state.gallery.push({image:url,title:document.getElementById('galleryTitle').value||'Titre',desc:document.getElementById('galleryDesc').value||'',price:document.getElementById('galleryPrice').value||''}); saveState(); renderGallery(); populateOeuvres();}
+function clearGallery(){ if(confirm('Vider la galerie ?')){ state.gallery=[]; saveState(); renderGallery(); populateOeuvres(); } }
 
+/* COMMANDE WhatsApp */
+function resetOrderForm(){ document.getElementById('orderForm').reset(); }
+function setSculpteurWA(){ const newWA=prompt("Numéro WhatsApp du sculpteur (+261...) :", sculpteurWA); if(newWA) {sculpteurWA=newWA; alert('Numéro mis à jour !');} }
 document.getElementById('orderForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.getElementById('orderName').value;
-    const email = document.getElementById('orderEmail').value;
-    const tel = document.getElementById('orderTel').value;
-    const type = document.getElementById('orderType').value;
-    const oeuvre = document.getElementById('orderOeuvre').value;
-    const qty = document.getElementById('orderQty').value;
-    const msg = document.getElementById('orderMsg').value;
-
-    const text = `🖌 Nouvelle commande :
-Nom : ${name}
-Email : ${email}
-Téléphone : ${tel}
-Type : ${type}
-Oeuvre : ${oeuvre}
-Quantité : ${qty}
-Message : ${msg}`;
-
-    const waURL = `https://wa.me/${sculpteurWA.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
-    window.open(waURL,'_blank');
-    alert('Commande envoyée via WhatsApp !');
-    resetOrderForm();
+  e.preventDefault();
+  const name=document.getElementById('orderName').value;
+  const email=document.getElementById('orderEmail').value;
+  const tel=document.getElementById('orderTel').value;
+  const type=document.getElementById('orderType').value;
+  const oeuvre=document.getElementById('orderOeuvre').value;
+  const qty=document.getElementById('orderQty').value;
+  const msg=document.getElementById('orderMsg').value;
+  const text=`🖌 Nouvelle commande :\nNom : ${name}\nEmail : ${email}\nTéléphone : ${tel}\nType : ${type}\nOeuvre : ${oeuvre}\nQuantité : ${qty}\nMessage : ${msg}`;
+  const waURL=`https://wa.me/${sculpteurWA.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
+  window.open(waURL,'_blank');
+  alert('Commande envoyée via WhatsApp !');
+  resetOrderForm();
 });
 
-loadState(); renderAll();
+loadState();
 </script>
 
 </body>
