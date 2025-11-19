@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>L'Art de la Sculpture Malgache</title>
+<style>
+:root{--accent:#8B5E3C;--bg:#fbf8f5;--muted:#666;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#222}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--accent);color:#fff}
+.brand{font-weight:800}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav button{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer}
+.container{max-width:1100px;margin:18px auto;padding:0 16px}
+.section{margin-top:18px;padding:14px;background:var(--card);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.section h2{color:var(--accent);margin:0 0 10px}
+.hero{display:flex;gap:20px;align-items:center}
+.hero .left{flex:1}
+.thumb{width:320px;border-radius:10px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.service-card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.gallery .item{position:relative;border-radius:8px;overflow:hidden;background:#eee;padding-bottom:6px}
+.gallery img{width:100%;height:140px;object-fit:cover;display:block;cursor:pointer;transition:transform .18s}
+.gallery img:hover{transform:scale(1.04)}
+.caption{padding:8px;font-size:13px}
+.title{font-weight:700;color:#222}
+.desc{color:var(--muted);font-size:13px;margin-top:4px}
+.price{color:var(--accent);font-weight:800;margin-top:6px}
+.footer{padding:20px;text-align:center;color:var(--muted)}
+.input,textarea,input[type=file],select{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;margin-bottom:8px}
+.btn{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.admin-panel{margin-top:12px;padding:10px;background:#fff8f0;border-radius:8px;border:1px dashed #efd0b3;display:none}
+.login-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10000}
+.login-card{background:#fff;padding:18px;border-radius:12px;width:94%;max-width:420px}
+.row{display:flex;gap:8px}
+.row .col{flex:1}
+.note{color:var(--muted);font-size:13px}
+@media(max-width:820px){.hero{flex-direction:column}.thumb{width:100%}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">L'Art de la Sculpture Malgache</div>
+  <nav class="nav">
+    <button onclick="show('accueil')">Accueil</button>
+    <button onclick="show('apropos')">À propos</button>
+    <button onclick="show('prehistoire')">Pré-histoire</button>
+    <button onclick="show('services')">Services</button>
+    <button onclick="show('galerie')">Galerie</button>
+    <button onclick="show('commande')">Commander</button>
+    <button onclick="show('contact')">Contact</button>
+    <button onclick="openLogin()">Admin</button>
+  </nav>
+</header>
+
+<main class="container">
+
+  <!-- ACCUEIL -->
+  <section id="accueil" class="section">
+    <div class="hero">
+      <div class="left">
+        <h2 id="heroTitle">Histoire & héritage de la sculpture malgache</h2>
+        <p id="heroText">Le sculpteur malgache puise son inspiration dans les traditions ancestrales et les légendes locales. Depuis des siècles, l’art de la sculpture transmet la culture, les croyances et l’âme du peuple.</p>
+      </div>
+      <div class="thumb">
+        <img id="heroImg" src="https://i.imgur.com/Fv1C9qR.jpg" alt="Accueil" onclick="openLightboxFromHero()">
+      </div>
+    </div>
+    <div class="admin-panel" id="adminAccueil">
+      <h3>Modifier Accueil</h3>
+      <textarea id="editHeroText" rows="4" class="input"></textarea>
+      <input type="file" id="editHeroImage" accept="image/*" class="input">
+      <button class="btn" onclick="saveHero()">Enregistrer</button>
+    </div>
+  </section>
+
+  <!-- A PROPOS -->
+  <section id="apropos" class="section" style="display:none">
+    <h2>À propos</h2>
+    <p id="aboutText">Artisan sculpteur malgache — bois, pierre et matériaux naturels.</p>
+    <div class="admin-panel" id="adminApropos">
+      <textarea id="editAbout" rows="4" class="input"></textarea>
+      <button class="btn" onclick="saveAbout()">Enregistrer</button>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="section" style="display:none">
+    <h2>Services</h2>
+    <div id="servicesGrid" class="services-grid"></div>
+    <div class="admin-panel" id="adminServices">
+      <textarea id="editServices" rows="4" class="input" placeholder="Une ligne = un service"></textarea>
+      <button class="btn" onclick="saveServices()">Enregistrer</button>
+    </div>
+  </section>
+
+  <!-- GALERIE -->
+  <section id="galerie" class="section" style="display:none">
+    <h2>Galerie</h2>
+    <div id="galleryGrid" class="gallery"></div>
+    <div class="admin-panel" id="adminGallery">
+      <input type="file" id="galleryFile" accept="image/*" class="input">
+      <input id="galleryTitle" class="input" placeholder="Titre">
+      <input id="galleryPrice" class="input" placeholder="Prix">
+      <textarea id="galleryDesc" rows="2" class="input" placeholder="Description"></textarea>
+      <button class="btn" onclick="addGalleryItem()">Ajouter</button>
+      <button class="btn ghost" onclick="clearGallery()">Vider la galerie</button>
+    </div>
+  </section>
+
+  <!-- COMMANDE -->
+  <section id="commande" class="section" style="display:none">
+    <h2>Commander une œuvre</h2>
+    <form id="orderForm">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="orderName" placeholder="Votre nom" required>
+        <input type="email" id="orderEmail" placeholder="Votre e-mail" required>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="orderTel" placeholder="Téléphone">
+        <select id="orderType">
+          <option value="bois">Bois</option>
+          <option value="pierre">Pierre</option>
+          <option value="mixte">Mixte</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <select id="orderOeuvre"></select>
+        <input type="number" id="orderQty" min="1" value="1">
+      </div>
+      <textarea id="orderMsg" placeholder="Message / détails" style="margin-top:8px"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" type="submit">Envoyer la commande</button>
+        <button class="btn ghost" type="button" onclick="resetOrderForm()">Annuler</button>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn ghost" type="button" onclick="setSculpteurWA()">Modifier WhatsApp du sculpteur</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section" style="display:none">
+    <h2>Contact</h2>
+    <p>Email : <span id="contactEmail">contact@artmalagasy.mg</span></p>
+    <p>Téléphone : <span id="contactTel">+261 34 00 000 00</span></p>
+    <p>Facebook : <span id="contactFB">facebook.com/natureartisanale</span></p>
+    <p>WhatsApp : <span id="contactWA">+261 34 00 000 00</span></p>
+  </section>
+
+</main>
+
+<footer class="footer">© <span id="year"></span> L'Art de la Sculpture Malgache — Madagascar</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" style="display:none" onclick="closeLightbox()">
+  <div class="box">
+    <img id="lightboxImg" src="">
+    <div class="info">
+      <div class="title" id="lightboxTitle"></div>
+      <div class="desc" id="lightboxDesc"></div>
+      <div class="price" id="lightboxPrice"></div>
+      <div style="margin-top:10px"><button class="btn" onclick="closeLightbox()">Fermer</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+const KEY='sculpture_site_final_v1';
+
+function defaultState(){ return {
+  hero:{text:'Le sculpteur malgache puise son inspiration dans les traditions ancestrales.',image:'https://i.imgur.com/Fv1C9qR.jpg'},
+  about:'Artisan sculpteur malgache — bois, pierre et matériaux naturels.',
+  services:['Commandes personnalisées','Restauration d’œuvres','Expositions','Ateliers & Formations'],
+  gallery:[
+    {image:'https://i.imgur.com/Fv1C9qR.jpg',title:'Sculpture Bois 1',desc:'Bois sculpté',price:'120 000 MGA'},
+    {image:'https://i.imgur.com/8TdD9zG.jpg',title:'Sculpture Pierre 1',desc:'Pierre gravée',price:'200 000 MGA'},
+    {image:'https://i.imgur.com/0Qx2hF7.jpg',title:'Sculpture Mixte 1',desc:'Mixte bois/pierre',price:'180 000 MGA'}
+  ]
+};}
+
+let state;
+function loadState(){ try{ state=JSON.parse(localStorage.getItem(KEY))||defaultState(); }catch(e){ state=defaultState(); } saveState();}
+function saveState(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+
+function renderAll(){
+  document.getElementById('year').textContent=new Date().getFullYear();
+  document.getElementById('heroText').textContent=state.hero.text;
+  document.getElementById('heroImg').src=state.hero.image;
+  document.getElementById('aboutText').textContent=state.about;
+  renderServices();
+  renderGallery();
+  populateOeuvres();
+}
+function renderServices(){ const g=document.getElementById('servicesGrid'); g.innerHTML=''; state.services.forEach(s=>{ const d=document.createElement('div'); d.className='service-card'; d.textContent=s; g.appendChild(d); });}
+function renderGallery(){ const g=document.getElementById('galleryGrid'); g.innerHTML=''; state.gallery.forEach((i,idx)=>{ const div=document.createElement('div'); div.className='item'; const img=document.createElement('img'); img.src=i.image; img.onclick=()=>openLightboxFromGallery(idx); const cap=document.createElement('div'); cap.className='caption'; const t=document.createElement('div'); t.className='title'; t.textContent=i.title; const d=document.createElement('div'); d.className='desc'; d.textContent=i.desc; const p=document.createElement('div'); p.className='price'; p.textContent=i.price; cap.appendChild(t);cap.appendChild(d);cap.appendChild(p); div.appendChild(img);div.appendChild(cap); g.appendChild(div); });}
+function populateOeuvres(){ const sel=document.getElementById('orderOeuvre'); if(!sel) return; sel.innerHTML=''; state.gallery.forEach(g=>{ const o=document.createElement('option'); o.value=g.title; o.textContent=g.title; sel.appendChild(o); });}
+
+/* LIGHTBOX */
+function openLightboxFromGallery(idx){ const i=state.gallery[idx]; document.getElementById('lightboxImg').src=i.image; document.getElementById('lightboxTitle').textContent=i.title; document.getElementById('lightboxDesc').textContent=i.desc; document.getElementById('lightboxPrice').textContent=i.price; document.getElementById('lightbox').style.display='flex';}
+function openLightboxFromHero(){ document.getElementById('lightboxImg').src=state.hero.image; document.getElementById('lightboxTitle').textContent=''; document.getElementById('lightboxDesc').textContent=state.hero.text; document.getElementById('lightboxPrice').textContent=''; document.getElementById('lightbox').style.display='flex';}
+function closeLightbox(){ document.getElementById('lightbox').style.display='none';}
+
+/* NAVIGATION */
+function show(id){ ['accueil','apropos','services','galerie','commande','contact'].forEach(s=>{document.getElementById(s).style.display=(s===id?'block':'none');});}
+
+/* ADMIN */
+function saveHero(){ const t=document.getElementById('editHeroText').value; state.hero.text=t; const f=document.getElementById('editHeroImage').files[0]; if(f){ const r=new FileReader(); r.onload=function(){ state.hero.image=r.result; saveState(); renderAll(); } r.readAsDataURL(f);} else { saveState(); renderAll(); } }
+function saveAbout(){ state.about=document.getElementById('editAbout').value; saveState(); renderAll(); }
+function saveServices(){ state.services=document.getElementById('editServices').value.split('\n').filter(Boolean); saveState(); renderServices(); populateOeuvres(); }
+function addGalleryItem(){ const f=document.getElementById('galleryFile').files[0]; if(!f) return alert('Choisir une image'); const t=document.getElementById('galleryTitle').value||'Titre'; const d=document.getElementById('galleryDesc').value||''; const p=document.getElementById('galleryPrice').value||''; const r=new FileReader(); r.onload=function(){ state.gallery.push({image:r.result,title:t,desc:d,price:p}); saveState(); renderGallery(); populateOeuvres(); }; r.readAsDataURL(f);}
+function clearGallery(){ if(confirm('Vider la galerie ?')){ state.gallery=[]; saveState(); renderGallery(); populateOeuvres(); } }
+function resetOrderForm(){ document.getElementById('orderForm').reset(); }
+
+/* -----------------------------
+   COMMANDE via WhatsApp
+----------------------------- */
+let sculpteurWA = '+261340000000';
+function setSculpteurWA(){
+    const newWA = prompt("Entrer le nouveau numéro WhatsApp du sculpteur (ex: +261340000000) :", sculpteurWA);
+    if(newWA){ sculpteurWA = newWA; alert('Numéro WhatsApp mis à jour !'); }
+}
+
+document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('orderName').value;
+    const email = document.getElementById('orderEmail').value;
+    const tel = document.getElementById('orderTel').value;
+    const type = document.getElementById('orderType').value;
+    const oeuvre = document.getElementById('orderOeuvre').value;
+    const qty = document.getElementById('orderQty').value;
+    const msg = document.getElementById('orderMsg').value;
+
+    const text = `🖌 Nouvelle commande :
+Nom : ${name}
+Email : ${email}
+Téléphone : ${tel}
+Type : ${type}
+Oeuvre : ${oeuvre}
+Quantité : ${qty}
+Message : ${msg}`;
+
+    const waURL = `https://wa.me/${sculpteurWA.replace(/\D/g,'')}?text=${encodeURIComponent(text)}`;
+    window.open(waURL,'_blank');
+    alert('Commande envoyée via WhatsApp !');
+    resetOrderForm();
+});
+
+loadState(); renderAll();
+</script>
+
+</body>
+</html>
